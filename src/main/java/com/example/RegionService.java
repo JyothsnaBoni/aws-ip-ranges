@@ -2,6 +2,7 @@ package com.example;
 
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Collectors; 
@@ -14,8 +15,14 @@ public class RegionService {
   private final String API_URL = "https://ip-ranges.amazonaws.com/ip-ranges.json";
 
   public String getRangesForRegion(String region) {
-    
-    String response = WebClient.create()
+      int size = 16 * 1024 * 1024;
+      ExchangeStrategies strategies = ExchangeStrategies.builder()
+              .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(size))
+              .build();
+
+
+      String response = WebClient.builder()
+              .exchangeStrategies(strategies).build()
       .get()
       .uri(API_URL)
       .retrieve()
